@@ -3,197 +3,195 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mapa de PCs - Aula</title>
+  <title>Control de Aulas y PCs - CENS 35</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-6 font-sans">
 
-  <!-- MODAL DE LOGIN (Validación en servidor) -->
+  <!-- MODAL 1: LOGIN GENERAL -->
   <div id="modal-login" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl text-slate-100">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
       <div class="text-center space-y-1">
-        <h2 class="text-xl font-bold text-white">Acceso Restringido</h2>
-        <p class="text-xs text-slate-400">Ingrese las credenciales del aula para continuar</p>
+        <h2 class="text-xl font-bold text-white">Acceso al Aula</h2>
+        <p class="text-xs text-slate-400">Ingrese las credenciales generales para acceder</p>
       </div>
-
-      <form onsubmit="validarLogin(event)" class="space-y-4">
+      <form onsubmit="validarLoginGeneral(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1">Usuario</label>
-          <input type="text" id="input-user" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:outline-none focus:border-blue-500" placeholder="Usuario...">
+          <input type="text" id="lg-user" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:outline-none focus:border-blue-500" placeholder="Usuario...">
         </div>
-
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1">Contraseña</label>
-          <input type="password" id="input-pass" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:outline-none focus:border-blue-500" placeholder="••••••••">
+          <input type="password" id="lg-pass" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:outline-none focus:border-blue-500" placeholder="••••••••">
         </div>
-
-        <p id="error-login" class="text-xs text-rose-400 text-center hidden">Usuario o contraseña incorrectos.</p>
-
-        <button type="submit" id="btn-login" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition shadow-md">
-          Ingresar al Mapa
-        </button>
+        <p id="lg-error" class="text-xs text-rose-400 text-center hidden">Credenciales incorrectas.</p>
+        <button type="submit" id="btn-login-gen" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition shadow-md">Ingresar al Mapa</button>
       </form>
     </div>
   </div>
 
+  <!-- MODAL 2: LOGIN ADMIN -->
+  <div id="modal-admin" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+        <h2 class="text-lg font-bold text-amber-400">Panel Administrador</h2>
+        <button onclick="cerrarModalAdmin()" class="text-slate-400 hover:text-white font-bold text-xl">&times;</button>
+      </div>
+      <form onsubmit="validarLoginAdmin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Usuario Admin</label>
+          <input type="text" id="adm-user" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:outline-none focus:border-amber-500" placeholder="admin">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Contraseña Admin</label>
+          <input type="password" id="adm-pass" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:outline-none focus:border-amber-500" placeholder="••••••••">
+        </div>
+        <p id="adm-error" class="text-xs text-rose-400 text-center hidden">Credenciales de administrador incorrectas.</p>
+        <button type="submit" id="btn-login-adm" class="w-full py-2.5 bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold rounded-lg transition shadow-md">Activar Modo Edición</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR PRINCIPAL -->
   <div class="max-w-4xl mx-auto space-y-6">
     
     <!-- Header -->
-    <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+    <div class="flex flex-col sm:flex-row justify-between items-center border-b border-slate-800 pb-4 gap-4">
       <div>
-        <h1 class="text-2xl font-bold">Mapa del Aula</h1>
-        <p class="text-xs text-slate-400">Control e inventario técnico de equipos</p>
+        <h1 class="text-2xl font-bold">Mapa de PCs</h1>
+        <div class="flex items-center gap-2 mt-1">
+          <label class="text-xs text-slate-400">Aula:</label>
+          <select id="select-aula" onchange="cambiarAula()" class="bg-slate-800 border border-slate-700 text-sm font-semibold rounded-lg p-1.5 focus:outline-none focus:border-blue-500">
+            <option value="">Cargando aulas...</option>
+          </select>
+        </div>
       </div>
-      <div class="flex gap-4 text-xs font-medium">
-        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Funciona</span>
-        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500"></span> Problemas</span>
-        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-500"></span> No funciona</span>
-      </div>
-    </div>
-
-    <!-- Pizarrón -->
-    <div class="w-full bg-slate-800 border-2 border-slate-600 rounded-lg py-2 text-center text-xs tracking-widest uppercase font-bold text-slate-300">
-      Pizarrón
-    </div>
-
-    <!-- Contenedor del Aula con Puerta Lateral -->
-    <div class="relative grid grid-cols-12 gap-4 bg-slate-950 p-6 rounded-2xl border border-slate-800">
       
-      <!-- Puerta -->
-      <div class="absolute -left-3 top-[38%] bg-slate-700 text-slate-300 border border-slate-500 text-[10px] uppercase font-bold tracking-widest py-6 px-1 rounded-md [writing-mode:vertical-lr] text-center shadow-lg">
-        Puerta
+      <div class="flex items-center gap-3">
+        <button onclick="abrirModalDashboard()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+          📊 Resumen
+        </button>
+        <div id="contenedor-btn-admin">
+          <button onclick="abrirModalAdmin()" id="btn-modo-admin" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-semibold transition">
+            🔒 Modo Edición
+          </button>
+        </div>
+        <div class="hidden md:flex gap-3 text-xs font-medium pl-2">
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Ok</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Problemas</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Fallo</span>
+        </div>
       </div>
+    </div>
 
-      <!-- Distribución del Aula -->
-      <div class="col-span-12 space-y-4 pl-4">
+    <!-- Contenedor Dinámico del Mapa -->
+    <div id="mapa-aula" class="relative bg-slate-950 p-6 rounded-2xl border border-slate-800 min-h-[350px] flex items-center justify-center shadow-inner overflow-hidden">
+      <p class="text-slate-500 text-sm">Cargando distribución del aula...</p>
+    </div>
 
-        <!-- Fila A -->
-        <div class="flex items-center gap-2">
-          <span class="w-6 text-xs font-bold text-slate-500 uppercase">A</span>
-          <div class="grid grid-cols-4 gap-3 w-full">
-            <div class="invisible"></div>
-            <div id="card-A-1" onclick="abrirModal('A-1')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">A-1</span>
-              <span id="icon-A-1" class="text-xs">⚪</span>
-            </div>
-            <div id="card-A-2" onclick="abrirModal('A-2')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">A-2</span>
-              <span id="icon-A-2" class="text-xs">⚪</span>
-            </div>
-            <div class="invisible"></div>
-          </div>
-        </div>
-
-        <!-- Fila B -->
-        <div class="flex items-center gap-2">
-          <span class="w-6 text-xs font-bold text-slate-500 uppercase">B</span>
-          <div class="grid grid-cols-4 gap-3 w-full">
-            <div id="card-B-1" onclick="abrirModal('B-1')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">B-1</span>
-              <span id="icon-B-1" class="text-xs">⚪</span>
-            </div>
-            <div id="card-B-2" onclick="abrirModal('B-2')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">B-2</span>
-              <span id="icon-B-2" class="text-xs">⚪</span>
-            </div>
-            <div id="card-B-3" onclick="abrirModal('B-3')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">B-3</span>
-              <span id="icon-B-3" class="text-xs">⚪</span>
-            </div>
-            <div id="card-B-4" onclick="abrirModal('B-4')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">B-4</span>
-              <span id="icon-B-4" class="text-xs">⚪</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Fila C -->
-        <div class="flex items-center gap-2">
-          <span class="w-6 text-xs font-bold text-slate-500 uppercase">C</span>
-          <div class="grid grid-cols-4 gap-3 w-full">
-            <div id="card-C-1" onclick="abrirModal('C-1')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">C-1</span>
-              <span id="icon-C-1" class="text-xs">⚪</span>
-            </div>
-            <div id="card-C-2" onclick="abrirModal('C-2')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">C-2</span>
-              <span id="icon-C-2" class="text-xs">⚪</span>
-            </div>
-            <div id="card-C-3" onclick="abrirModal('C-3')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">C-3</span>
-              <span id="icon-C-3" class="text-xs">⚪</span>
-            </div>
-            <div id="card-C-4" onclick="abrirModal('C-4')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">C-4</span>
-              <span id="icon-C-4" class="text-xs">⚪</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Fila D -->
-        <div class="flex items-center gap-2">
-          <span class="w-6 text-xs font-bold text-slate-500 uppercase">D</span>
-          <div class="grid grid-cols-4 gap-3 w-full">
-            <div class="invisible"></div>
-            <div class="invisible"></div>
-            <div id="card-D-1" onclick="abrirModal('D-1')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">D-1</span>
-              <span id="icon-D-1" class="text-xs">⚪</span>
-            </div>
-            <div id="card-D-2" onclick="abrirModal('D-2')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">D-2</span>
-              <span id="icon-D-2" class="text-xs">⚪</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Fila E -->
-        <div class="flex items-center gap-2">
-          <span class="w-6 text-xs font-bold text-slate-500 uppercase">E</span>
-          <div class="grid grid-cols-4 gap-3 w-full">
-            <div id="card-E-1" onclick="abrirModal('E-1')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">E-1</span>
-              <span id="icon-E-1" class="text-xs">⚪</span>
-            </div>
-            <div class="invisible"></div>
-            <div id="card-E-2" onclick="abrirModal('E-2')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">E-2</span>
-              <span id="icon-E-2" class="text-xs">⚪</span>
-            </div>
-            <div id="card-E-3" onclick="abrirModal('E-3')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">E-3</span>
-              <span id="icon-E-3" class="text-xs">⚪</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Fila F -->
-        <div class="flex items-center gap-2">
-          <span class="w-6 text-xs font-bold text-slate-500 uppercase">F</span>
-          <div class="grid grid-cols-4 gap-3 w-full">
-            <div class="invisible"></div>
-            <div class="invisible"></div>
-            <div id="card-F-1" onclick="abrirModal('F-1')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">F-1</span>
-              <span id="icon-F-1" class="text-xs">⚪</span>
-            </div>
-            <div id="card-F-2" onclick="abrirModal('F-2')" class="bg-slate-900 border-2 border-slate-700 p-3 rounded-xl cursor-pointer hover:border-slate-500 transition text-center shadow-md">
-              <span class="font-bold text-sm block">F-2</span>
-              <span id="icon-F-2" class="text-xs">⚪</span>
-            </div>
-          </div>
-        </div>
-
+    <!-- Panel de Edición (Admin) -->
+    <div id="panel-admin" class="hidden bg-slate-800/80 border border-amber-500/50 p-4 rounded-xl flex flex-wrap justify-between items-center gap-3">
+      <span class="text-xs text-amber-300 font-semibold flex items-center gap-1">
+        ⚠️ Modo Administrador: Haz clic en cualquier PC para Editar/Eliminar.
+      </span>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="abrirModalConfigAula()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold rounded-lg transition">⚙️ Config. Pizarrón/Puerta</button>
+        <button onclick="abrirModalNuevaAula()" class="px-3 py-1.5 bg-amber-700 hover:bg-amber-600 text-white text-xs font-semibold rounded-lg transition">➕ Nueva Aula</button>
+        <button onclick="abrirModalNuevaPC()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold rounded-lg transition">➕ Agregar PC</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal de Detalle de PC -->
+  <!-- MODAL: DASHBOARD -->
+  <div id="modal-dashboard" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-2xl text-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">📊 Resumen del Aula</h2>
+          <p id="dash-nombre-aula" class="text-xs text-slate-400">Estadísticas e incidencias</p>
+        </div>
+        <button onclick="cerrarModalDashboard()" class="text-slate-400 hover:text-white font-bold text-xl">&times;</button>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+        <div class="bg-slate-900/60 border border-slate-700 p-3 rounded-xl">
+          <span class="block text-xs text-slate-400">Total PCs</span>
+          <span id="stat-total" class="text-xl font-bold text-white">0</span>
+        </div>
+        <div class="bg-emerald-950/40 border border-emerald-800/60 p-3 rounded-xl">
+          <span class="block text-xs text-emerald-400">Operativas</span>
+          <span id="stat-funciona" class="text-xl font-bold text-emerald-400">0</span>
+        </div>
+        <div class="bg-amber-950/40 border border-amber-800/60 p-3 rounded-xl">
+          <span class="block text-xs text-amber-400">Con Problemas</span>
+          <span id="stat-problemas" class="text-xl font-bold text-amber-400">0</span>
+        </div>
+        <div class="bg-rose-950/40 border border-rose-800/60 p-3 rounded-xl">
+          <span class="block text-xs text-rose-400">Fuera Servicio</span>
+          <span id="stat-no-funciona" class="text-xl font-bold text-rose-400">0</span>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <h3 class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Desglose de incidencias y equipos afectados</h3>
+        <div id="desglose-problemas" class="bg-slate-900 p-3 rounded-xl text-xs space-y-2 text-slate-300 max-h-48 overflow-y-auto">
+          <p class="text-slate-500 italic">No hay incidencias reportadas.</p>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="cerrarModalDashboard()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold rounded-lg transition">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIGURAR PIZARRÓN Y PUERTA (ADMIN) -->
+  <div id="modal-config-aula" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-800 border border-amber-500/50 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+      <h2 class="text-lg font-bold text-amber-400">Configurar Elementos del Aula</h2>
+      <form onsubmit="guardarConfigAula(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">Texto del Pizarrón</label>
+          <input type="text" id="cfg-text-pizarron" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">Posición del Pizarrón</label>
+          <select id="cfg-pos-pizarron" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-amber-500">
+            <option value="arriba">Arriba</option>
+            <option value="abajo">Abajo</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs text-slate-300 mb-1">Lado de la Puerta</label>
+            <select id="cfg-lado-puerta" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-amber-500">
+              <option value="izquierda">Izquierda</option>
+              <option value="derecha">Derecha</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-300 mb-1">Fila de la Puerta</label>
+            <input type="text" id="cfg-fila-puerta" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm uppercase focus:outline-none focus:border-amber-500" placeholder="B">
+          </div>
+        </div>
+        <div class="space-y-2 text-xs pt-1">
+          <label class="flex items-center gap-2 text-slate-300"><input type="checkbox" id="cfg-mostrar-pizarron"> Mostrar Pizarrón</label>
+          <label class="flex items-center gap-2 text-slate-300"><input type="checkbox" id="cfg-mostrar-puerta"> Mostrar Puerta Lateral</label>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="cerrarModalConfigAula()" class="px-3 py-1.5 text-xs text-slate-400 hover:text-white">Cancelar</button>
+          <button type="submit" id="btn-save-cfg" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold rounded-lg transition">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALLE / ACTUALIZAR ESTADO DE PC -->
   <div id="modal-detalle" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl text-slate-100">
       <div class="flex justify-between items-center border-b border-slate-700 pb-3">
         <h2 id="modal-titulo" class="text-lg font-bold">Equipo</h2>
-        <button onclick="cerrarModal()" class="text-slate-400 hover:text-white font-bold text-xl">&times;</button>
+        <button onclick="cerrarModalDetalle()" class="text-slate-400 hover:text-white font-bold text-xl">&times;</button>
       </div>
 
       <form id="form-actualizar" class="space-y-4">
@@ -201,12 +199,11 @@
           <label class="block text-xs font-semibold text-slate-300 mb-1">Estado del Equipo</label>
           <select id="select-estado" onchange="cambiarEstadoSelect()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:outline-none focus:border-blue-500">
             <option value="Funciona bien">🟢 Funciona bien</option>
-            <option value="Hay problemas">🟡 Hay problemas</option>
+            <option value="Hay problemas">🟡 Hay problemas (Operativo parcial)</option>
             <option value="No funciona">🔴 No funciona</option>
           </select>
         </div>
 
-        <!-- Opciones si Hay Problemas -->
         <div id="seccion-problemas" class="hidden space-y-2 bg-slate-900/50 p-3 rounded-lg border border-slate-700">
           <label class="block text-xs font-semibold text-slate-300">¿Dónde se presenta el problema?</label>
           <div class="grid grid-cols-2 gap-2 text-xs">
@@ -218,7 +215,6 @@
           </div>
         </div>
 
-        <!-- Opciones si No Funciona -->
         <div id="seccion-no-funciona" class="hidden space-y-2 bg-slate-900/50 p-3 rounded-lg border border-slate-700">
           <label class="block text-xs font-semibold text-slate-300">¿Qué ocurre al intentar encenderla?</label>
           <div class="space-y-1.5 text-xs">
@@ -230,113 +226,564 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Detalle o Mensaje de Error (Adicional)</label>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Detalle Adicional</label>
           <textarea id="text-detalle" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:outline-none focus:border-blue-500" placeholder="Escriba observaciones adicionales..."></textarea>
         </div>
 
         <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="cerrarModal()" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white">Cancelar</button>
-          <button type="button" id="btn-guardar" onclick="guardarCambios()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition">Guardar Cambios</button>
+          <button type="button" onclick="cerrarModalDetalle()" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white">Cancelar</button>
+          <button type="button" id="btn-guardar" onclick="guardarCambiosEstado()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR O ELIMINAR PC (ADMIN) -->
+  <div id="modal-editar-pc" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-800 border border-amber-500/50 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+        <h2 id="edit-modal-titulo" class="text-lg font-bold text-amber-400">Editar Equipo</h2>
+        <button onclick="cerrarModalEditarPC()" class="text-slate-400 hover:text-white font-bold text-xl">&times;</button>
+      </div>
+
+      <form onsubmit="guardarEdicionPC(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">ID / Nombre de PC</label>
+          <input type="text" id="edit-pcId" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs text-slate-300 mb-1">Fila (ej: G)</label>
+            <input type="text" id="edit-fila" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm uppercase focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-300 mb-1">Columna (ej: 1)</label>
+            <input type="number" id="edit-col" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+        <p id="edit-error-posicion" class="text-xs text-rose-400 hidden">Esa posición ya está ocupada por otra PC.</p>
+        
+        <div class="flex justify-between items-center pt-3 border-t border-slate-700">
+          <button type="button" onclick="eliminarPC()" id="btn-delete-pc" class="px-3 py-1.5 bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-semibold rounded-lg transition">🗑️ Eliminar</button>
+          <div class="flex gap-2">
+            <button type="button" onclick="cerrarModalEditarPC()" class="px-3 py-1.5 text-xs text-slate-400 hover:text-white">Cancelar</button>
+            <button type="submit" id="btn-save-edit" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold rounded-lg transition">Guardar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: AGREGAR PC (ADMIN) -->
+  <div id="modal-nueva-pc" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+      <h2 class="text-lg font-bold text-amber-400">Agregar Nueva PC</h2>
+      <form onsubmit="guardarNuevaPC(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">ID / Nombre de PC (ej: G-1)</label>
+          <input type="text" id="new-pcId" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs text-slate-300 mb-1">Fila (ej: G)</label>
+            <input type="text" id="new-fila" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm uppercase focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-300 mb-1">Columna (ej: 1)</label>
+            <input type="number" id="new-col" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+        <p id="error-posicion" class="text-xs text-rose-400 hidden">Ya existe una PC asignada a esa Fila y Columna.</p>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="cerrarModalNuevaPC()" class="px-3 py-1.5 text-xs text-slate-400 hover:text-white">Cancelar</button>
+          <button type="submit" id="btn-add-pc" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold rounded-lg transition">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: AGREGAR AULA (ADMIN) -->
+  <div id="modal-nueva-aula" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+      <h2 class="text-lg font-bold text-amber-400">Agregar Nueva Aula</h2>
+      <form onsubmit="guardarNuevaAula(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">ID Aula (ej: aula-lab-3)</label>
+          <input type="text" id="new-aulaId" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">Nombre Visible (ej: Laboratorio 3)</label>
+          <input type="text" id="new-aulaNombre" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="cerrarModalNuevaAula()" class="px-3 py-1.5 text-xs text-slate-400 hover:text-white">Cancelar</button>
+          <button type="submit" id="btn-add-aula" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold rounded-lg transition">Crear Aula</button>
         </div>
       </form>
     </div>
   </div>
 
   <script>
-    let datosPCs = {};
-    const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbzcHVEqepKebgZ51RDYEYx6CCaHFWtCayp7Dcwonf6Qiv80lih9Dzem5jrllFRsIwk/exec";
+    const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbyHn_coZyXFtQCKgVSSWHpG-pKCcf8gANEzVtbCHp0HS2Cm1c-xe8c_S6jDWsuIqKnE/exec";
+    
+    let datosGlobales = { aulas: [], pcs: [] };
+    let aulaActualId = "";
+    let pcSeleccionadaId = "";
 
-    // Validar login contra Google Apps Script
-    async function validarLogin(event) {
-      event.preventDefault();
-      const user = document.getElementById('input-user').value.trim();
-      const pass = document.getElementById('input-pass').value.trim();
-      const errorMsg = document.getElementById('error-login');
-      const btnLogin = document.getElementById('btn-login');
+    async function validarLoginGeneral(e) {
+      e.preventDefault();
+      const user = document.getElementById('lg-user').value.trim();
+      const pass = document.getElementById('lg-pass').value.trim();
+      const btn = document.getElementById('btn-login-gen');
 
-      errorMsg.classList.add('hidden');
-      btnLogin.innerText = "Verificando...";
-      btnLogin.disabled = true;
+      btn.innerText = "Verificando...";
+      btn.disabled = true;
 
       try {
-        const response = await fetch(URL_APPS_SCRIPT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: "login", user: user, pass: pass })
-        });
-
-        const resData = await response.json();
-
-        if (resData.status === "success") {
-          sessionStorage.setItem('sesion_activa', 'true');
+        const res = await fetch(URL_APPS_SCRIPT, { method: 'POST', body: JSON.stringify({ action: "login_general", user, pass }) });
+        const data = await res.json();
+        
+        if (data.status === "success") {
+          sessionStorage.setItem('sesion_general', 'true');
           document.getElementById('modal-login').classList.add('hidden');
-          cargarEstadoDesdeSheets();
+          cargarDatosSistema();
         } else {
-          errorMsg.innerText = "Usuario o contraseña incorrectos.";
-          errorMsg.classList.remove('hidden');
+          document.getElementById('lg-error').classList.remove('hidden');
         }
-      } catch (error) {
-        console.error("Error en validación:", error);
-        errorMsg.innerText = "Error de conexión. Intente nuevamente.";
-        errorMsg.classList.remove('hidden');
+      } catch(err) {
+        console.error(err);
       } finally {
-        btnLogin.innerText = "Ingresar al Mapa";
-        btnLogin.disabled = false;
+        btn.innerText = "Ingresar al Mapa";
+        btn.disabled = false;
       }
     }
 
-    // Comprobar sesión activa al cargar la página
+    async function validarLoginAdmin(e) {
+      e.preventDefault();
+      const user = document.getElementById('adm-user').value.trim();
+      const pass = document.getElementById('adm-pass').value.trim();
+      const btn = document.getElementById('btn-login-adm');
+
+      btn.innerText = "Verificando...";
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(URL_APPS_SCRIPT, { method: 'POST', body: JSON.stringify({ action: "login_admin", user, pass }) });
+        const data = await res.json();
+        
+        if (data.status === "success") {
+          sessionStorage.setItem('sesion_admin', 'true');
+          cerrarModalAdmin();
+          activarModoAdminUI();
+        } else {
+          document.getElementById('adm-error').classList.remove('hidden');
+        }
+      } catch(err) {
+        console.error(err);
+      } finally {
+        btn.innerText = "Activar Modo Edición";
+        btn.disabled = false;
+      }
+    }
+
+    function activarModoAdminUI() {
+      const contenedorBtn = document.getElementById('contenedor-btn-admin');
+      contenedorBtn.innerHTML = `
+        <button onclick="salirModoAdmin()" class="px-3 py-1.5 bg-amber-600/30 border border-amber-500 rounded-lg text-xs font-semibold text-amber-300 hover:bg-amber-600/50 transition flex items-center gap-1.5">
+          🔓 Salir Edición
+        </button>
+      `;
+      document.getElementById('panel-admin').classList.remove('hidden');
+    }
+
+    function salirModoAdmin() {
+      sessionStorage.removeItem('sesion_admin');
+      const contenedorBtn = document.getElementById('contenedor-btn-admin');
+      contenedorBtn.innerHTML = `
+        <button onclick="abrirModalAdmin()" id="btn-modo-admin" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-semibold transition">
+          🔒 Modo Edición
+        </button>
+      `;
+      document.getElementById('panel-admin').classList.add('hidden');
+    }
+
     window.onload = function() {
-      if (sessionStorage.getItem('sesion_activa') === 'true') {
+      if (sessionStorage.getItem('sesion_general') === 'true') {
         document.getElementById('modal-login').classList.add('hidden');
-        cargarEstadoDesdeSheets();
+        cargarDatosSistema();
+      }
+      if (sessionStorage.getItem('sesion_admin') === 'true') {
+        activarModoAdminUI();
       }
     };
 
-    async function cargarEstadoDesdeSheets() {
+    async function cargarDatosSistema() {
       try {
-        const response = await fetch(URL_APPS_SCRIPT);
-        const data = await response.json();
+        const res = await fetch(URL_APPS_SCRIPT);
+        datosGlobales = await res.json();
         
-        data.forEach(item => {
-          const pcId = item.pcId;
-          const estado = item.estado;
-          const tipoProblema = item.tipoProblema;
-          const detalleExtra = item.detalleExtra;
+        const select = document.getElementById('select-aula');
+        select.innerHTML = "";
 
-          datosPCs[pcId] = { estado, tipoProblema, detalleExtra };
-          actualizarVisualPC(pcId, estado);
+        if (!datosGlobales.aulas || datosGlobales.aulas.length === 0) {
+          select.innerHTML = `<option value="">Sin aulas configuradas</option>`;
+          renderizarMapa();
+          return;
+        }
+
+        datosGlobales.aulas.forEach(a => {
+          select.innerHTML += `<option value="${a.aulaId}">${a.nombre}</option>`;
         });
 
-        console.log("Datos sincronizados con éxito desde Google Sheets.");
-      } catch (error) {
-        console.error("Error al cargar Google Sheets:", error);
+        if (!aulaActualId && datosGlobales.aulas.length > 0) {
+          aulaActualId = datosGlobales.aulas[0].aulaId;
+        }
+        select.value = aulaActualId;
+        renderizarMapa();
+      } catch (err) {
+        console.error("Error al cargar datos", err);
       }
     }
-	
-    function actualizarVisualPC(pcId, estado) {
-      const card = document.getElementById(`card-${pcId}`);
-      const icon = document.getElementById(`icon-${pcId}`);
-      if (!card || !icon) return;
 
-      card.className = "bg-slate-900 border-2 p-3 rounded-xl cursor-pointer transition text-center shadow-md";
+    function cambiarAula() {
+      aulaActualId = document.getElementById('select-aula').value;
+      renderizarMapa();
+    }
+
+    function renderizarMapa() {
+      const contenedor = document.getElementById('mapa-aula');
+      contenedor.innerHTML = "";
+
+      const aulaObj = (datosGlobales.aulas || []).find(a => a.aulaId === aulaActualId);
+      const pcsAula = (datosGlobales.pcs || []).filter(p => p.aulaId === aulaActualId);
       
-      if (estado === 'Funciona bien') {
-        card.classList.add('border-emerald-500/80', 'hover:border-emerald-400');
-        icon.innerText = '🟢';
-      } else if (estado === 'Hay problemas') {
-        card.classList.add('border-amber-500/80', 'hover:border-amber-400');
-        icon.innerText = '🟡';
-      } else if (estado === 'No funciona') {
-        card.classList.add('border-rose-500/80', 'hover:border-rose-400');
-        icon.innerText = '🔴';
+      let html = `<div class="relative w-full max-w-2xl mx-auto space-y-4">`;
+
+      let pizarronHtml = "";
+      if (!aulaObj || aulaObj.mostrarPizarron !== false) {
+        const textoPiz = aulaObj && aulaObj.textoPizarron ? aulaObj.textoPizarron : "Pizarrón";
+        pizarronHtml = `<div class="w-full bg-slate-800 border-2 border-slate-600 rounded-lg py-1.5 text-center text-xs tracking-widest uppercase font-bold text-slate-300 shadow-sm">${textoPiz}</div>`;
+      }
+      const posPiz = aulaObj && aulaObj.posicionPizarron ? aulaObj.posicionPizarron : 'arriba';
+
+      if (posPiz === 'arriba' && pizarronHtml) {
+        html += pizarronHtml + `<div class="mb-4"></div>`;
+      }
+
+      if (pcsAula.length === 0) {
+        html += `<p class="text-slate-500 text-sm text-center py-6">No hay equipos registrados en esta aula.</p>`;
+      } else {
+        let filasObj = {};
+        pcsAula.forEach(pc => {
+          const filaKey = pc.fila || "A";
+          if (!filasObj[filaKey]) filasObj[filaKey] = [];
+          filasObj[filaKey].push(pc);
+        });
+
+        const filaPuertaConfig = aulaObj && aulaObj.filaPuerta ? aulaObj.filaPuerta.toUpperCase() : 'B';
+        const ladoPuertaConfig = aulaObj && aulaObj.ladoPuerta ? aulaObj.ladoPuerta : 'izquierda';
+        const mostrarPuerta = !aulaObj || aulaObj.mostrarPuerta !== false;
+
+        html += `<div class="space-y-4 px-2">`;
+        Object.keys(filasObj).sort().forEach(filaKey => {
+          const esFilaConPuerta = mostrarPuerta && filaKey === filaPuertaConfig;
+
+          const elemPuerta = esFilaConPuerta 
+            ? `<div class="bg-slate-700 text-slate-300 border border-slate-500 text-[10px] uppercase font-bold tracking-widest py-3 px-1 rounded-md [writing-mode:vertical-lr] text-center shadow-lg shrink-0">Puerta</div>`
+            : `<div class="w-5 shrink-0"></div>`;
+
+          html += `<div class="flex items-center gap-2">`;
+
+          if (ladoPuertaConfig === 'izquierda') {
+            html += elemPuerta;
+          }
+
+          html += `<span class="w-5 text-xs font-bold text-slate-500 uppercase text-center">${filaKey}</span>
+                   <div class="grid grid-cols-4 gap-3 w-full">`;
+          
+          filasObj[filaKey].sort((a,b) => parseInt(a.columna) - parseInt(b.columna)).forEach(pc => {
+            let colorBorde = "border-emerald-500/80 hover:border-emerald-400";
+            let icono = "🟢";
+            if (pc.estado === "Hay problemas") { colorBorde = "border-amber-500/80 hover:border-amber-400"; icono = "🟡"; }
+            if (pc.estado === "No funciona") { colorBorde = "border-rose-500/80 hover:border-rose-400"; icono = "🔴"; }
+
+            html += `
+              <div onclick="clicEnPC('${pc.pcId}')" class="bg-slate-900 border-2 ${colorBorde} p-3 rounded-xl cursor-pointer hover:scale-105 transition text-center shadow-md">
+                <span class="font-bold text-sm block text-white">${pc.pcId}</span>
+                <span class="text-xs">${icono}</span>
+              </div>`;
+          });
+
+          html += `</div>`;
+
+          if (ladoPuertaConfig === 'derecha') {
+            html += elemPuerta;
+          }
+
+          html += `</div>`;
+        });
+        html += `</div>`;
+      }
+
+      if (posPiz === 'abajo' && pizarronHtml) {
+        html += `<div class="mt-4"></div>` + pizarronHtml;
+      }
+
+      html += `</div>`;
+      contenedor.innerHTML = html;
+    }
+
+    function clicEnPC(pcId) {
+      if (sessionStorage.getItem('sesion_admin') === 'true') {
+        abrirModalEditarPC(pcId);
+      } else {
+        abrirModalDetalle(pcId);
       }
     }
 
-    function abrirModal(pcId) {
+    // Modal Config Pizarrón / Puerta (Admin)
+    function abrirModalConfigAula() {
+      const aulaObj = (datosGlobales.aulas || []).find(a => a.aulaId === aulaActualId);
+      if (!aulaObj) return;
+
+      document.getElementById('cfg-text-pizarron').value = aulaObj.textoPizarron || "Pizarrón";
+      document.getElementById('cfg-pos-pizarron').value = aulaObj.posicionPizarron || "arriba";
+      document.getElementById('cfg-lado-puerta').value = aulaObj.ladoPuerta || "izquierda";
+      document.getElementById('cfg-fila-puerta').value = aulaObj.filaPuerta || "B";
+      document.getElementById('cfg-mostrar-pizarron').checked = aulaObj.mostrarPizarron !== false;
+      document.getElementById('cfg-mostrar-puerta').checked = aulaObj.mostrarPuerta !== false;
+
+      document.getElementById('modal-config-aula').classList.remove('hidden');
+    }
+    function cerrarModalConfigAula() { document.getElementById('modal-config-aula').classList.add('hidden'); }
+
+    async function guardarConfigAula(e) {
+      e.preventDefault();
+      const textoPizarron = document.getElementById('cfg-text-pizarron').value.trim();
+      const posicionPizarron = document.getElementById('cfg-pos-pizarron').value;
+      const ladoPuerta = document.getElementById('cfg-lado-puerta').value;
+      const filaPuerta = document.getElementById('cfg-fila-puerta').value.trim().toUpperCase();
+      const mostrarPizarron = document.getElementById('cfg-mostrar-pizarron').checked;
+      const mostrarPuerta = document.getElementById('cfg-mostrar-puerta').checked;
+      const btn = document.getElementById('btn-save-cfg');
+
+      btn.innerText = "Guardando...";
+      btn.disabled = true;
+
+      try {
+        await fetch(URL_APPS_SCRIPT, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: "editar_config_aula", aulaId: aulaActualId, textoPizarron, posicionPizarron, ladoPuerta, filaPuerta, mostrarPizarron, mostrarPuerta })
+        });
+
+        alert("¡Configuración actualizada con éxito!");
+        cerrarModalConfigAula();
+        setTimeout(() => { 
+          cargarDatosSistema(); 
+          btn.innerText = "Guardar";
+          btn.disabled = false;
+        }, 2500);
+      } catch(err) {
+        console.error(err);
+        btn.innerText = "Guardar";
+        btn.disabled = false;
+      }
+    }
+
+    // Modal Editar / Eliminar PC (Admin)
+    function abrirModalEditarPC(pcId) {
+      pcSeleccionadaId = pcId;
+      const pcData = datosGlobales.pcs.find(p => p.aulaId === aulaActualId && p.pcId === pcId);
+      if (!pcData) return;
+
+      document.getElementById('edit-modal-titulo').innerText = `Editar Equipo ${pcId}`;
+      document.getElementById('edit-pcId').value = pcData.pcId;
+      document.getElementById('edit-fila').value = pcData.fila;
+      document.getElementById('edit-col').value = pcData.columna;
+      document.getElementById('edit-error-posicion').classList.add('hidden');
+
+      // Resetear botón de edición por si acaso
+      const btn = document.getElementById('btn-save-edit');
+      btn.innerText = "Guardar";
+      btn.disabled = false;
+
+      document.getElementById('modal-editar-pc').classList.remove('hidden');
+    }
+    function cerrarModalEditarPC() { document.getElementById('modal-editar-pc').classList.add('hidden'); }
+
+    async function guardarEdicionPC(e) {
+      e.preventDefault();
+      const nuevoPcId = document.getElementById('edit-pcId').value.trim();
+      const nuevaFila = document.getElementById('edit-fila').value.trim().toUpperCase();
+      const nuevaColumna = document.getElementById('edit-col').value.trim();
+      const errorMsg = document.getElementById('edit-error-posicion');
+
+      const pcsEnAula = (datosGlobales.pcs || []).filter(p => p.aulaId === aulaActualId && p.pcId !== pcSeleccionadaId);
+      const posicionOcupada = pcsEnAula.some(p => p.fila === nuevaFila && p.columna == nuevaColumna);
+
+      if (posicionOcupada) {
+        errorMsg.classList.remove('hidden');
+        return;
+      }
+
+      const btn = document.getElementById('btn-save-edit');
+      btn.innerText = "Guardando...";
+      btn.disabled = true;
+
+      try {
+        await fetch(URL_APPS_SCRIPT, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: "editar_pc", aulaId: aulaActualId, pcIdViejo: pcSeleccionadaId, nuevoPcId, nuevaFila, nuevaColumna })
+        });
+
+        alert("¡Equipo modificado con éxito!");
+        cerrarModalEditarPC();
+        setTimeout(() => { 
+          cargarDatosSistema(); 
+          btn.innerText = "Guardar";
+          btn.disabled = false;
+        }, 2500);
+      } catch(err) {
+        console.error(err);
+        btn.innerText = "Guardar";
+        btn.disabled = false;
+      }
+    }
+
+    async function eliminarPC() {
+      if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente el equipo ${pcSeleccionadaId}?`)) return;
+
+      const btn = document.getElementById('btn-delete-pc');
+      btn.innerText = "Eliminando...";
+      btn.disabled = true;
+
+      try {
+        await fetch(URL_APPS_SCRIPT, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: "eliminar_pc", aulaId: aulaActualId, pcId: pcSeleccionadaId })
+        });
+
+        alert("¡Equipo eliminado con éxito!");
+        cerrarModalEditarPC();
+        setTimeout(() => { 
+          cargarDatosSistema(); 
+          btn.innerText = "🗑️ Eliminar";
+          btn.disabled = false;
+        }, 2500);
+      } catch(err) {
+        console.error(err);
+        btn.innerText = "🗑️ Eliminar";
+        btn.disabled = false;
+      }
+    }
+
+    // Dashboard
+    function abrirModalDashboard() {
+      const pcsAula = (datosGlobales.pcs || []).filter(p => p.aulaId === aulaActualId);
+      const total = pcsAula.length;
+
+      if (total === 0) {
+        alert("No hay equipos en esta aula para generar un resumen.");
+        return;
+      }
+
+      let funciona = 0, problemas = 0, noFunciona = 0;
+      let mapeoProblemas = {};
+      let mapeoFallos = {};
+
+      pcsAula.forEach(pc => {
+        if (pc.estado === "Funciona bien") {
+          funciona++;
+        } else if (pc.estado === "Hay problemas") {
+          problemas++;
+          if (pc.tipoProblema) {
+            pc.tipoProblema.split(' | ').forEach(sub => {
+              let t = sub.trim();
+              if (t) {
+                if (!mapeoProblemas[t]) mapeoProblemas[t] = [];
+                mapeoProblemas[t].push(pc.pcId);
+              }
+            });
+          } else {
+            let t = "Problema sin especificar";
+            if (!mapeoProblemas[t]) mapeoProblemas[t] = [];
+            mapeoProblemas[t].push(pc.pcId);
+          }
+        } else if (pc.estado === "No funciona") {
+          noFunciona++;
+          if (pc.tipoProblema) {
+            let t = pc.tipoProblema.trim();
+            if (t) {
+              if (!mapeoFallos[t]) mapeoFallos[t] = [];
+              mapeoFallos[t].push(pc.pcId);
+            }
+          } else {
+            let t = "Fuera de servicio (Sin especificar)";
+            if (!mapeoFallos[t]) mapeoFallos[t] = [];
+            mapeoFallos[t].push(pc.pcId);
+          }
+        }
+      });
+
+      document.getElementById('stat-total').innerText = total;
+      document.getElementById('stat-funciona').innerText = funciona;
+      document.getElementById('stat-problemas').innerText = problemas;
+      document.getElementById('stat-no-funciona').innerText = noFunciona;
+
+      const aulaObj = (datosGlobales.aulas || []).find(a => a.aulaId === aulaActualId);
+      document.getElementById('dash-nombre-aula').innerText = aulaObj ? aulaObj.nombre : "Aula seleccionada";
+
+      const contenedorDesglose = document.getElementById('desglose-problemas');
+      contenedorDesglose.innerHTML = "";
+
+      let hayContenido = false;
+
+      Object.keys(mapeoProblemas).forEach(tipo => {
+        hayContenido = true;
+        let listaPcs = mapeoProblemas[tipo].join(', ');
+        contenedorDesglose.innerHTML += `
+          <div class="bg-amber-950/40 p-2.5 rounded-lg border border-amber-800/60 space-y-1">
+            <div class="flex justify-between items-center font-bold text-amber-300">
+              <span>🟡 ${tipo}</span>
+              <span class="bg-amber-900/60 text-xs px-2 py-0.5 rounded text-amber-200">${mapeoProblemas[tipo].length} equipo(s)</span>
+            </div>
+            <p class="text-xs text-amber-200/80 font-mono">PCs afectadas: ${listaPcs}</p>
+          </div>`;
+      });
+
+      Object.keys(mapeoFallos).forEach(tipo => {
+        hayContenido = true;
+        let listaPcs = mapeoFallos[tipo].join(', ');
+        contenedorDesglose.innerHTML += `
+          <div class="bg-rose-950/40 p-2.5 rounded-lg border border-rose-800/60 space-y-1">
+            <div class="flex justify-between items-center font-bold text-rose-300">
+              <span>🔴 ${tipo}</span>
+              <span class="bg-rose-900/60 text-xs px-2 py-0.5 rounded text-rose-200">${mapeoFallos[tipo].length} equipo(s)</span>
+            </div>
+            <p class="text-xs text-rose-200/80 font-mono">PCs afectadas: ${listaPcs}</p>
+          </div>`;
+      });
+
+      if (!hayContenido) {
+        contenedorDesglose.innerHTML = `<p class="text-slate-500 italic">Excelente: No hay incidencias reportadas.</p>`;
+      }
+
+      document.getElementById('modal-dashboard').classList.remove('hidden');
+    }
+    function cerrarModalDashboard() { document.getElementById('modal-dashboard').classList.add('hidden'); }
+
+    // Detalle Estado PC
+    function abrirModalDetalle(pcId) {
+      pcSeleccionadaId = pcId;
       document.getElementById('modal-titulo').innerText = `Equipo ${pcId}`;
       
-      const pcData = datosPCs[pcId] || { estado: 'Funciona bien', tipoProblema: '', detalleExtra: '' };
+      const pcData = datosGlobales.pcs.find(p => p.aulaId === aulaActualId && p.pcId === pcId) || { estado: 'Funciona bien', tipoProblema: '', detalleExtra: '' };
       
       document.getElementById('select-estado').value = pcData.estado;
       document.getElementById('text-detalle').value = pcData.detalleExtra === 'undefined' ? '' : pcData.detalleExtra;
@@ -357,11 +804,21 @@
         });
       }
 
+      // Resetear botón al abrir el modal
+      resetearBotonGuardar();
+
       document.getElementById('modal-detalle').classList.remove('hidden');
     }
 
-    function cerrarModal() {
+    function cerrarModalDetalle() { 
       document.getElementById('modal-detalle').classList.add('hidden');
+      resetearBotonGuardar();
+    }
+
+    function resetearBotonGuardar() {
+      const btnGuardar = document.getElementById('btn-guardar');
+      btnGuardar.innerText = "Guardar Cambios";
+      btnGuardar.disabled = false;
     }
 
     function cambiarEstadoSelect() {
@@ -372,17 +829,12 @@
       secProblemas.classList.add('hidden');
       secNoFunciona.classList.add('hidden');
 
-      if (estado === 'Hay problemas') {
-        secProblemas.classList.remove('hidden');
-      } else if (estado === 'No funciona') {
-        secNoFunciona.classList.remove('hidden');
-      }
+      if (estado === 'Hay problemas') secProblemas.classList.remove('hidden');
+      else if (estado === 'No funciona') secNoFunciona.classList.remove('hidden');
     }
 
-    async function guardarCambios() {
-      const pcId = document.getElementById('modal-titulo').innerText.replace('Equipo ', '');
+    async function guardarCambiosEstado() {
       const estado = document.getElementById('select-estado').value;
-      
       let tipoProblema = "";
 
       if (estado === 'Hay problemas') {
@@ -395,11 +847,8 @@
       }
 
       const detalleExtra = document.getElementById('text-detalle').value.trim();
-
-      datosPCs[pcId] = { estado, tipoProblema, detalleExtra };
-      actualizarVisualPC(pcId, estado);
-
       const btnGuardar = document.getElementById('btn-guardar');
+
       btnGuardar.innerText = "Guardando...";
       btnGuardar.disabled = true;
 
@@ -408,19 +857,127 @@
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pcId, estado, tipoProblema, detalleExtra })
+          body: JSON.stringify({ action: "actualizar_estado", aulaId: aulaActualId, pcId: pcSeleccionadaId, estado, tipoProblema, detalleExtra })
         });
 
         alert("¡Estado actualizado correctamente!");
-        cerrarModal();
+        cerrarModalDetalle();
         
-        setTimeout(cargarEstadoDesdeSheets, 2000);
+        setTimeout(() => { 
+          cargarDatosSistema(); 
+        }, 2500);
+
       } catch (error) {
         console.error("Error al guardar:", error);
         alert("Hubo un error al actualizar los datos.");
-      } finally {
-        btnGuardar.innerText = "Guardar Cambios";
-        btnGuardar.disabled = false;
+        resetearBotonGuardar();
+      }
+    }
+
+    function abrirModalAdmin() {
+      if (sessionStorage.getItem('sesion_admin') === 'true') {
+        alert("El modo administrador ya se encuentra activo.");
+        return;
+      }
+      document.getElementById('modal-admin').classList.remove('hidden');
+    }
+    function cerrarModalAdmin() { document.getElementById('modal-admin').classList.add('hidden'); }
+    
+    function abrirModalNuevaPC() { 
+      document.getElementById('error-posicion').classList.add('hidden');
+      document.getElementById('new-pcId').value = "";
+      document.getElementById('new-fila').value = "";
+      document.getElementById('new-col').value = "";
+      
+      const btn = document.getElementById('btn-add-pc');
+      btn.innerText = "Guardar";
+      btn.disabled = false;
+
+      document.getElementById('modal-nueva-pc').classList.remove('hidden'); 
+    }
+    function cerrarModalNuevaPC() { document.getElementById('modal-nueva-pc').classList.add('hidden'); }
+    
+    function abrirModalNuevaAula() { 
+      const btn = document.getElementById('btn-add-aula');
+      btn.innerText = "Crear Aula";
+      btn.disabled = false;
+
+      document.getElementById('modal-nueva-aula').classList.remove('hidden'); 
+    }
+    function cerrarModalNuevaAula() { document.getElementById('modal-nueva-aula').classList.add('hidden'); }
+
+    async function guardarNuevaPC(e) {
+      e.preventDefault();
+      const pcId = document.getElementById('new-pcId').value.trim();
+      const fila = document.getElementById('new-fila').value.trim().toUpperCase();
+      const columna = document.getElementById('new-col').value.trim();
+      const errorMsg = document.getElementById('error-posicion');
+
+      const pcsEnAula = (datosGlobales.pcs || []).filter(p => p.aulaId === aulaActualId);
+      const posicionOcupada = pcsEnAula.some(p => p.fila === fila && p.columna == columna);
+
+      if (posicionOcupada) {
+        errorMsg.classList.remove('hidden');
+        return;
+      } else {
+        errorMsg.classList.add('hidden');
+      }
+
+      const btn = document.getElementById('btn-add-pc');
+      btn.innerText = "Guardando...";
+      btn.disabled = true;
+
+      try {
+        await fetch(URL_APPS_SCRIPT, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: "guardar_pc", aulaId: aulaActualId, pcId, fila, columna })
+        });
+
+        alert("¡PC agregada con éxito!");
+        cerrarModalNuevaPC();
+        setTimeout(() => { 
+          cargarDatosSistema(); 
+          btn.innerText = "Guardar";
+          btn.disabled = false;
+        }, 2500);
+      } catch(err) {
+        console.error(err);
+        btn.innerText = "Guardar";
+        btn.disabled = false;
+      }
+    }
+
+    async function guardarNuevaAula(e) {
+      e.preventDefault();
+      const aulaId = document.getElementById('new-aulaId').value.trim();
+      const nombre = document.getElementById('new-aulaNombre').value.trim();
+      const btn = document.getElementById('btn-add-aula');
+
+      btn.innerText = "Creando...";
+      btn.disabled = true;
+
+      try {
+        await fetch(URL_APPS_SCRIPT, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: "guardar_aula", aulaId, nombre })
+        });
+
+        alert("¡Aula creada con éxito!");
+        cerrarModalNuevaAula();
+        aulaActualId = aulaId;
+        setTimeout(() => { 
+          cargarDatosSistema(); 
+          btn.innerText = "Crear Aula";
+          btn.disabled = false;
+        }, 2500);
+      } catch(err) {
+        console.error(err);
+        btn.innerText = "Crear Aula";
+        btn.disabled = false;
       }
     }
   </script>
